@@ -17,14 +17,24 @@ install_crate = "rustfmt"
 command = "cargo"
 args = ["fmt", "--all", "--"]
 
-[tasks.my-flow]
+[tasks.setup-db]
+command = "diesel"
+args = ["setup"]
+
+[tasks.migration]
+command = "diesel"
+args = ["migration", "run"]
+
+[tasks.generate-schema]
+command = "diesel"
+args = ["print-schema", ">", "src/schema.rs"]
+
+[tasks.setup]
 dependencies = [
     "format",
+		"setup-db",
+		"migration",
+		"generate-schema",
     "build",
     "test"
 ]
-
-[tasks.setup-db]
-install_crate = "diesel_cli"
-command = "diesel"
-args = ["diesel setup"]
