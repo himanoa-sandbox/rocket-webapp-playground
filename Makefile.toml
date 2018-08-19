@@ -34,7 +34,5 @@ dependencies = [
     "format",
 		"setup-db",
 		"migration",
-		"generate-schema",
-    "build",
-    "test"
+		"generate-schema"
 ]
