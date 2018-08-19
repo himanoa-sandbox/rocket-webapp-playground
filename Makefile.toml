@@ -23,3 +23,8 @@ dependencies = [
     "build",
     "test"
 ]
+
+[tasks.setup-db]
+install_crate = "diesel_cli"
+command = "diesel"
+args = ["diesel setup"]
