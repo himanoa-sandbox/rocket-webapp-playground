@@ -1,4 +1,4 @@
-use rocket_contrib::json::{Json};
+use rocket_contrib::json::Json;
 use serde_json::Value;
 
 #[catch(400)]

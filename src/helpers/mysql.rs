@@ -1,9 +1,9 @@
-use std::ops::Deref;
+use diesel::mysql::MysqlConnection;
+use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
-use rocket::{Request, State, Outcome};
-use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
-use diesel::mysql::MysqlConnection;
+use rocket::{Outcome, Request, State};
+use std::ops::Deref;
 
 pub struct DbConn(pub PooledConnection<ConnectionManager<MysqlConnection>>);
 type MysqlPool = Pool<ConnectionManager<MysqlConnection>>;
@@ -20,7 +20,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for DbConn {
         let pool = request.guard::<State<MysqlPool>>()?;
         match pool.get() {
             Ok(conn) => Outcome::Success(DbConn(conn)),
-            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))
+            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ())),
         }
     }
 }
