@@ -2,12 +2,36 @@
 #![plugin(rocket_codegen)]
 extern crate rust_webapp_playground;
 extern crate rocket;
+extern crate rocket_contrib;
+extern crate diesel;
+extern crate serde;
+#[macro_use] extern crate serde_json;
 
 use std::env;
+use rocket_contrib::json::Json;
+
+use rust_webapp_playground::models::user::{NewUser};
+use rust_webapp_playground::helpers::mysql::{init_mysql_pool,DbConn};
+use rust_webapp_playground::schema::users::dsl::users;
+use diesel::RunQueryDsl;
 
 #[get("/")]
 fn info() -> &'static str {
     "Hello"
+}
+
+#[post("/user", data = "<new_user>", format="application/json")]
+pub fn create_user(new_user: Json<NewUser>, db: DbConn) -> rocket_contrib::Json {
+    let new_users = vec![NewUser { name: new_user.0.name }];
+    let result = diesel::insert_into(users).values(&new_users).execute(&*db);
+    match result {
+        Ok(_) => Json(json!({
+            "status": "created"
+        })),
+        Err(_) => Json(json!({
+            "status": "err"
+        }))
+    }
 }
 
 fn main() {
@@ -19,8 +43,9 @@ fn main() {
         }
     };
     rocket::ignite()
-        .manage(rust_webapp_playground::helpers::mysql::init_mysql_pool(&db_url))
+        .manage(init_mysql_pool(&db_url))
         .mount("/", routes![info])
+        .mount("/", routes![create_user])
         .catch(catchers![
                rust_webapp_playground::error_handlers::bad_request,
                rust_webapp_playground::error_handlers::unauthorized,
